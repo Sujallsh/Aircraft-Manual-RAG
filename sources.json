@@ -1,0 +1,18 @@
+[
+  {
+    "manufacturer": "Airbus",
+    "aircraft": "A320",
+    "title": "A320 Aircraft Characteristics: Airport and Maintenance Planning",
+    "filename": "airbus_a320_aircraft_characteristics.pdf",
+    "url": "https://mediaassets.airbus.com/pm_38_916_916266-iujedqawwy.pdf?fileName=aca32001-jul-2026-2.pdf",
+    "source_page": "https://www.aircraft.airbus.com/en/customer-care/fleet-wide-care/airport-operations-and-aircraft-characteristics/aircraft-characteristics"
+  },
+  {
+    "manufacturer": "Boeing",
+    "aircraft": "737 NG",
+    "title": "Next-Generation 737 Airplane Characteristics for Airport Planning",
+    "filename": "boeing_737ng_airplane_characteristics.pdf",
+    "url": "https://www.boeing.com/content/dam/boeing/v2/airports/acaps/737NG_REV_C.pdf",
+    "source_page": "https://www.boeing.com/commercial/airports/plan-manuals"
+  }
+]

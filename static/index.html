@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Aircraft Manual RAG</title>
+  <style>
+    :root { color-scheme: dark; font-family: Inter, ui-sans-serif, system-ui, sans-serif; background:#08111f; color:#e8eef8; }
+    * { box-sizing:border-box; } body { margin:0; min-height:100vh; background:radial-gradient(circle at 80% 0,#17335a 0,transparent 35%),#08111f; }
+    main { width:min(960px,92vw); margin:0 auto; padding:48px 0 64px; }
+    header { display:flex; justify-content:space-between; align-items:end; gap:24px; margin-bottom:30px; }
+    h1 { font-size:clamp(32px,5vw,54px); letter-spacing:-.04em; margin:0; } p { color:#aebdd2; line-height:1.6; }
+    .status { color:#7dd3fc; font-size:14px; } .controls { display:grid; grid-template-columns:1fr auto; gap:12px; }
+    textarea, select, button { font:inherit; border:1px solid #29415e; border-radius:12px; background:#0d1b2e; color:#eef6ff; }
+    textarea { width:100%; min-height:110px; padding:16px; resize:vertical; } select, button { padding:0 16px; }
+    button { cursor:pointer; background:#22a6f2; color:#04101c; border:0; font-weight:700; } button.secondary { background:#17283f; color:#d8e8fb; padding:10px 14px; }
+    .toolbar { display:flex; gap:10px; margin:12px 0 26px; } .answer { font-size:18px; line-height:1.7; white-space:pre-wrap; background:#0c1829; padding:24px; border-radius:16px; border:1px solid #203752; min-height:100px; }
+    .sources { margin-top:22px; } details { border-top:1px solid #203752; padding:14px 0; } summary { cursor:pointer; color:#c9d9ec; }
+    .score { color:#67e8f9; font-variant-numeric:tabular-nums; } .excerpt { color:#9fb0c6; font-size:14px; line-height:1.55; }
+    @media(max-width:650px){ header{display:block}.controls{grid-template-columns:1fr}.controls button{padding:13px}.toolbar{flex-wrap:wrap} }
+  </style>
+</head>
+<body><main>
+  <header><div><h1>Aircraft Manual RAG</h1><p>Compare baseline RAG, GraphRAG, and LightRAG-style retrieval over official Airbus and Boeing planning manuals.</p></div><div id="status" class="status">Checking index…</div></header>
+  <div class="controls"><textarea id="question" placeholder="Example: Compare the ground servicing information for the A320 and 737."></textarea><button id="ask">Ask</button></div>
+  <div class="toolbar"><select id="engine"><option value="rag">Baseline RAG</option><option value="graphrag">GraphRAG</option><option value="lightrag">LightRAG</option></select><button id="ingest" class="secondary">Build index</button></div>
+  <section id="answer" class="answer">Download the manuals, then build the index to begin.</section><section id="sources" class="sources"></section>
+</main><script>
+const statusEl=document.querySelector('#status'), answerEl=document.querySelector('#answer'), sourcesEl=document.querySelector('#sources');
+async function status(){const r=await fetch('/api/status');const d=await r.json();statusEl.textContent=d.ready?`${d.chunks} chunks indexed`:'Index not built';}
+document.querySelector('#ingest').onclick=async()=>{statusEl.textContent='Indexing manuals…';const r=await fetch('/api/ingest',{method:'POST'});const d=await r.json();if(!r.ok){answerEl.textContent=d.detail;return}answerEl.textContent=d.message;status();};
+document.querySelector('#ask').onclick=async()=>{const question=document.querySelector('#question').value.trim();if(!question)return;answerEl.textContent='Searching…';sourcesEl.innerHTML='';const r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question,engine:document.querySelector('#engine').value,top_k:5})});const d=await r.json();if(!r.ok){answerEl.textContent=d.detail;return}answerEl.textContent=d.answer;sourcesEl.innerHTML='<h2>Retrieved evidence</h2>'+d.sources.map((s,i)=>`<details ${i===0?'open':''}><summary><span class="score">${s.score.toFixed(3)}</span> · ${s.citation}</summary><p class="excerpt">${s.text.replaceAll('&','&amp;').replaceAll('<','&lt;')}</p><small>${s.reasons.join(' · ')}</small></details>`).join('');};
+status();
+</script></body></html>
+
